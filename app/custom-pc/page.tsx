@@ -3,21 +3,85 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaRobot } from "react-icons/fa";
 import { IoChatbubbles } from "react-icons/io5";
-import { inflate } from "node:zlib";
+
+const categories = ["CPU", "GPU", "Motherboard", "RAM", "Storage", "PSU", "Cooler", "Cabinet", "Keyboard", "Mouse", "Monitor", "Speaker"];
+const mandatoryCategories = ["CPU", "GPU", "Motherboard", "RAM", "Storage", "PSU"];
+
+const brandOptions: Record<string, { brand: string; price: number }[]> = {
+  CPU: [
+    { brand: "Intel i5", price: 15000 },
+    { brand: "Intel i7", price: 25000 },
+    { brand: "AMD Ryzen 5", price: 16000 },
+    { brand: "AMD Ryzen 7", price: 27000 },
+  ],
+  GPU: [
+    { brand: "Nvidia RTX 3060", price: 40000 },
+    { brand: "Nvidia RTX 3070", price: 60000 },
+    { brand: "AMD RX 6700XT", price: 50000 },
+  ],
+  Motherboard: [
+    { brand: "Asus B450", price: 10000 },
+    { brand: "MSI B550", price: 15000 },
+  ],
+  RAM: [
+    { brand: "Corsair 16GB", price: 8000 },
+    { brand: "Kingston 32GB", price: 15000 },
+  ],
+  Storage: [
+    { brand: "Samsung 1TB SSD", price: 9000 },
+    { brand: "WD 2TB HDD", price: 6000 },
+  ],
+  PSU: [
+    { brand: "Corsair 650W", price: 7000 },
+    { brand: "Cooler Master 750W", price: 10000 },
+  ],
+  Cooler: [
+    { brand: "Deepcool Air", price: 3000 },
+    { brand: "NZXT Liquid", price: 8000 },
+  ],
+  Cabinet: [
+    { brand: "NZXT H510", price: 6000 },
+    { brand: "Cooler Master", price: 7000 },
+  ],
+  Keyboard: [
+    { brand: "Logitech G213", price: 4000 },
+    { brand: "Razer Cynosa", price: 5000 },
+  ],
+  Mouse: [
+    { brand: "Logitech G502", price: 3500 },
+    { brand: "Razer DeathAdder", price: 4000 },
+  ],
+  Monitor: [
+    { brand: "LG 24-inch", price: 12000 },
+    { brand: "Dell 27-inch", price: 18000 },
+  ],
+  Speaker: [
+    { brand: "JBL 2.1", price: 5000 },
+    { brand: "Bose Companion", price: 10000 },
+  ],
+};
 
 const CustomPCPage = () => {
   const [budget, setBudget] = useState("");
   const [recommendedBuild, setRecommendedBuild] = useState(null);
   const [hovered, setHovered] = useState(false);
-  
-  const categories = ["CPU", "GPU", "PSU", "RAM", "Storage", "Motherboard", "Cooler","Cabinat","KeyBoard","Mouse","Monitor","Speaker"];
-  const [selections, setSelections] = useState<Record<string, { brand: string; price: string }>>(
+  const [selections, setSelections] = useState<Record<string, { brand: string; price: number }>>(
     categories.reduce((acc, category) => {
-      acc[category] = { brand: "", price: "" };
+      acc[category] = { brand: "", price: 0 };
       return acc;
-    }, {} as Record<string, { brand: string; price: string }>)
+    }, {} as Record<string, { brand: string; price: number }>)
   );
-  
+
+  const handleBrandChange = (category: string, brand: string) => {
+    const selectedOption = brandOptions[category].find((item) => item.brand === brand);
+    if (selectedOption) {
+      setSelections((prev) => ({
+        ...prev,
+        [category]: { brand: selectedOption.brand, price: selectedOption.price },
+      }));
+    }
+  };
+
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -48,25 +112,21 @@ const CustomPCPage = () => {
       }
     };
   }, []);
-  
-  const handleBudgetChange = (event) => {
+
+  const handleBudgetChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setBudget(event.target.value);
   };
 
-  const handleSelectionChange = (category, field, value) => {
-    setSelections((prev) => ({
-      ...prev,
-      [category]: { ...prev[category], [field]: value },
-    }));
-  };
-
   const fetchRecommendedBuild = async () => {
+    if (!budget || isNaN(Number(budget))) {
+      alert("Please enter a valid budget.");
+      return;
+    }
+
     try {
       const response = await fetch("/api/get-best-pc", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ budget: parseInt(budget, 10) }),
       });
       const data = await response.json();
@@ -77,60 +137,57 @@ const CustomPCPage = () => {
   };
 
   const handleProceedToCart = () => {
+    const missingFields = mandatoryCategories.filter((category) => !selections[category].brand);
+    if (missingFields.length > 0) {
+      alert(`Please fill in the required fields: ${missingFields.join(", ")}`);
+      return;
+    }
+
     const cartItems = Object.entries(selections)
       .map(([category, { brand, price }]) => ({ category, brand, price }))
-      .filter(item => item.brand && item.price);
-    
+      .filter((item) => item.brand && item.price);
+
     console.log("Cart Items:", cartItems);
-    // Logic to update cart state can be added here
   };
 
   return (
-    
     <div className="container mx-auto mt-40 p-6 grid grid-cols-4 gap-6">
+      <h1 className="col-span-4 text-3xl font-bold text-center mb-6">Customize Your Own PC</h1>
+
       {categories.map((category) => (
         <div key={category} className="p-4 border rounded bg-gray-100 dark:bg-black dark:text-white">
-          <h3 className="font-medium">{category}</h3>
-          <input
-            type="text"
-            placeholder="Brand Name"
+          <h3 className="font-medium">{category} {mandatoryCategories.includes(category) && <span className="text-red-500">*</span>}</h3>
+          <select
             value={selections[category].brand}
-            onChange={(e) => handleSelectionChange(category, "brand", e.target.value)}
-            className="p-2  rounded w-full mb-2 "
-          />
+            onChange={(e) => handleBrandChange(category, e.target.value)}
+            className="p-2 rounded w-full mb-2"
+          >
+            <option value="">Select {category}</option>
+            {brandOptions[category]?.map((item) => (
+              <option key={item.brand} value={item.brand}>{item.brand}</option>
+            ))}
+          </select>
           <input
             type="number"
-            placeholder="Price"
-            value={selections[category].price}
-            onChange={(e) => handleSelectionChange(category, "price", e.target.value)}
-            className="p-2  rounded w-full"
+            value={selections[category].price || ""}
+            readOnly
+            className="p-2 rounded w-full"
           />
         </div>
       ))}
-      
-      <button className="rounded  h-20  bg-blue-500 text-black dark:text-white text-center cursor-pointer hover:bg-red-500" onClick={handleProceedToCart}>
+
+      <button className="rounded h-20 bg-blue-500 text-black dark:text-white text-center cursor-pointer hover:bg-red-500" onClick={handleProceedToCart}>
         Proceed to Cart
       </button>
-      
+
       <div className="col-span-4 p-4 border rounded shadow-lg text-center">
-        <h1 className="text-2xl font-bold mb-4">Customize Your PC</h1>
-        <label htmlFor="budget" className="font-medium">Enter your budget:</label>
-        <input
-          type="number"
-          id="budget"
-          value={budget}
-          onChange={handleBudgetChange}
-          className="p-2 border rounded w-full mb-4"
-          placeholder="Enter your budget in Rupees"
-        />
-        <button
-          onClick={fetchRecommendedBuild}
-          className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 w-full"
-        >
+        <h1 className="text-2xl font-bold mb-4">Budget-Based Build Recommendation</h1>
+        <input type="number" id="budget" value={budget} onChange={handleBudgetChange} className="p-2 border rounded w-full mb-4" placeholder="Enter your budget in Rupees" />
+        <button onClick={fetchRecommendedBuild} className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 w-full">
           Get Best Build
         </button>
       </div>
-
+       
       {recommendedBuild && (
         <div className="col-span-4 mt-6 p-4 border rounded shadow-lg">
           <h2 className="text-xl font-semibold">Recommended Build</h2>
@@ -141,20 +198,11 @@ const CustomPCPage = () => {
           <p><strong>Price:</strong> ₹{recommendedBuild.price}</p>
         </div>
       )}
-
-      <motion.div 
-        className="col-span-4 mt-6 p-4 border rounded shadow-lg text-center"
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        whileHover={{ scale: 1.1 }}
-        transition={{ type: "spring", stiffness:100 }}
-      >
+      <motion.div className="col-span-4 mt-6 p-4 border rounded shadow-lg text-center" onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)} whileHover={{ scale: 1.1 }} transition={{ type: "spring", stiffness: 100 }}>
         <h2 className="text-xl font-semibold mb-2">AI Assistant</h2>
         {hovered ? <IoChatbubbles className="text-5xl text-blue-600 mx-auto mb-2 animate-bounce" /> : <FaRobot className="text-5xl text-blue-600 mx-auto mb-2" />}
         <textarea className="w-full p-2 border rounded" placeholder="Enter your message..."></textarea>
-        <button className="bg-green-600 text-white p-2 rounded hover:bg-green-700 mt-2 w-full">
-          Send
-        </button>
+        <button className="bg-green-600 text-white p-2 rounded hover:bg-green-700 mt-2 w-full">Send</button>
       </motion.div>
     </div>
   );
