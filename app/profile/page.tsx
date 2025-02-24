@@ -6,10 +6,10 @@ const ProfilePage = () => {
   const [selectedTab, setSelectedTab] = useState("profile");
   const [profileImage, setProfileImage] = useState("/path/to/default-profile.jpg");
   const [userData, setUserData] = useState({
-    name: "John Doe",
-    email: "johndoe@example.com",
-    phone: "123-456-7890",
-    age: "25",
+    name: "",
+    email: "",
+    phone: "",
+    age: "",
   });
   const [editMode, setEditMode] = useState(false);
 
@@ -27,7 +27,6 @@ const ProfilePage = () => {
             <div className="flex items-center space-x-4">
               <img
                 src={profileImage}
-                alt="Profile"
                 className="rounded-full w-24 h-24 border-4 border-gray-300 dark:border-gray-700"
               />
               <input
@@ -107,7 +106,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 pt-24 flex flex-col mt-20 lg:flex-row">
       {/* Sidebar */}
       <div className="w-full lg:w-1/4 bg-gray-200 dark:bg-gray-800 p-6 shadow-lg rounded-lg border border-gray-300 dark:border-gray-700 mb-6 lg:mb-0">
         <div className="flex flex-col items-center">
