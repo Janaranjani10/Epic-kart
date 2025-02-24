@@ -1,0 +1,65 @@
+const headsets = [
+    {
+      id: 1,
+      name: "Sony WH-1000XM5",
+      brand: "Sony",
+      type: "Wireless",
+      battery: "30 hours",
+      connectivity: "Bluetooth 5.2",
+      price: 29999,
+      image: "/images/headsets/1.jpg",
+    },
+    {
+      id: 2,
+      name: "Apple AirPods Pro (2nd Gen)",
+      brand: "Apple",
+      type: "True Wireless",
+      battery: "6 hours (buds) + 30 hours (case)",
+      connectivity: "Bluetooth 5.3",
+      price: 24999,
+      image: "/images/headsets/12.jpg",
+    },
+    {
+      id: 3,
+      name: "Bose QuietComfort 45",
+      brand: "Bose",
+      type: "Wireless",
+      battery: "24 hours",
+      connectivity: "Bluetooth 5.1",
+      price: 28999,
+      image: "/images/headsets/3.jpg",
+    },
+    {
+      id: 4,
+      name: "JBL Quantum 800",
+      brand: "JBL",
+      type: "Wireless Gaming",
+      battery: "14 hours",
+      connectivity: "Bluetooth + 2.4GHz Wireless",
+      price: 15999,
+      image: "/images/headsets/4.jpg",
+    },
+    {
+      id: 5,
+      name: "HyperX Cloud II",
+      brand: "HyperX",
+      type: "Wired Gaming",
+      battery: "N/A",
+      connectivity: "3.5mm / USB",
+      price: 8999,
+      image: "/images/headsets/15.jpg",
+    },
+    {
+      id: 6,
+      name: "boAt Rockerz 255 Pro+",
+      brand: "boAt",
+      type: "Neckband",
+      battery: "40 hours",
+      connectivity: "Bluetooth 5.0",
+      price: 1999,
+      image: "/images/headsets/19.jpg",
+    }
+  ];
+  
+  export default headsets;
+  
